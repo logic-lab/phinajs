@@ -18,8 +18,8 @@ var ASSETS = {
   spritesheet: {
     rat_ss: {
       frame: {
-        width: 80,
-        height: 108,
+        width: 97,
+        height: 130,
         cols: 5,
         rows: 1,
       },
