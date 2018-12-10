@@ -230,7 +230,7 @@ phina.main(function() {
   
   // アプリケーション生成
   var app = GameApp({
-    startLabel: 'main',
+    startLabel: 'title',
     assets: ASSETS,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
