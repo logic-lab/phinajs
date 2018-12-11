@@ -1,4 +1,3 @@
-// phina.js をグローバル領域に展開
 phina.globalize();
 
 var SCREEN_WIDTH = 480;
@@ -165,25 +164,44 @@ phina.define(
     init: function(option) {
       this.superInit(option);
       
-      // ゲームのBGMを再生
+      // ToDo: phinajsのSoundManagerがstop()の実装をした場合ここを書き換える
+      // ゲームのBGMを再生(Fade=0sec,ループ=しない)
       SoundManager.playMusic("game",0,false);
       
-      // 背景色を指定
+      // 背景色
       this.backgroundSprite = Sprite("background").addChildTo(this);
       this.backgroundSprite.x = this.gridX.center();
       this.backgroundSprite.y = this.gridY.center();
       
-      // ネズミの追加
+      // ネズミ
       this.rat = Rat().addChildTo(this);
       this.rat.x = this.gridX.center() - 8;
       this.rat.y = this.gridY.center() - 45;
       
-      // チーズの追加
+      // チーズ
       this.cheese = Cheese().addChildTo(this);
       this.cheese.x = this.gridX.center();
       this.cheese.y = this.gridY.center();
       
-      // テロップの追加
+      // ゲージ
+      this.gauge = Gauge({
+        x: this.gridX.center(),
+        y: 25,
+        width: 400,
+        height: 20,
+        cornerRadius: 0,
+        maxValue: 100,
+        value: 0,
+        fill: '#f8da79',
+        gaugeColor: '#e41c5a',
+        stroke: '#f8da79',
+        strokeWidth: 20,
+      }).addChildTo(this);
+      
+      // ゲージのアニメーションを止める
+      this.gauge.animation = false;
+      
+      // テロップ
       this.telop = Telop().addChildTo(this);
       this.telop.x = this.gridX.center();
       this.telop.y = 55;
@@ -191,12 +209,16 @@ phina.define(
       // クリック判定
       this.playable = true;
       
-      // 時間制限
+      // ゲージの増減量
+      this.gauge_point = 10;
+      
+      // 時間制限（5秒）
       setTimeout(function(){
         this.showMiss();
       }.bind(this),5000);
       
     },
+    // 成功の表示
     showSuccess: function(){
       if( this.playable ){
         this.playable = false;
@@ -207,6 +229,7 @@ phina.define(
         this.cheese.hide();
       }
     },
+    // 失敗の表示
     showMiss: function(){
       if( this.playable ){
         this.playable = false;
@@ -216,11 +239,65 @@ phina.define(
         this.telop.miss();
       }
     },
-    onclick: function(){
+    // マウスが押された
+    onpointstart: function(){
+      
+      // プレイ中であれば
       if( this.playable ){
-        this.showSuccess();
-        this.cheese.miss();
+        
+        // 最大値と同じであれば
+        if( this.gauge.value === this.gauge.maxValue ){
+          
+          // 成功を表示する
+          this.showSuccess();
+          
+        }
+        // それ以外は
+        else {
+          
+          // 失敗を表示する
+          this.showMiss();
+          
+          // 欠けたチーズを表示する
+          this.cheese.miss();
+          
+        }
+        
       }
+      
+    },
+    // 各フレームごとに処理される
+    update: function(){
+      
+      // プレイ中であれば
+      if( this.playable ){
+        
+        // ゲージを、変化させる
+        this.gauge.value += this.gauge_point;
+        
+        // 最大値以上の場合
+        if( this.gauge.value >= this.gauge.maxValue ){
+          
+          // 最大値を代入（最大値を超えないように）
+          this.gauge.value = this.gauge.maxValue;
+          
+          // ゲージの変化量を反転する
+          this.gauge_point *= -1;
+          
+        }
+        // 0以下の場合
+        else if( this.gauge.value <= 0 ){
+          
+          // 0を代入（0を下回らないように）
+          this.gauge.value = 0;
+          
+          // ゲージの変化量を反転する
+          this.gauge_point *= -1;
+          
+        }
+        
+      }
+      
     },
   }
 );
